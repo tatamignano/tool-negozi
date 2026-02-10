@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Tool liste store MediaWorld (incolla HTML)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: flex; gap: 2rem; padding: 1rem; }
+    .col { flex: 1; min-width: 0; }
+    textarea { width: 100%; height: 220px; font-family: monospace; font-size: 12px; }
+    #status { font-size: .9rem; color: #555; margin-bottom: .5rem; }
+    .region { margin-bottom: 1rem; border-bottom: 1px solid #ccc; padding-bottom: .5rem; }
+    .region h4 { margin: .2rem 0; }
+    .city-list { columns: 2; column-gap: 1.5rem; }
+    .city { break-inside: avoid; display: block; }
+    pre { background:#f5f5f5; padding:.5rem; white-space:pre-wrap; max-height:80vh; overflow:auto; }
+    button { margin-top:.3rem; margin-right:.3rem; }
+  </style>
+</head>
+<body>
+  <div class="col">
+    <h2>1. Incolla HTML store-finder</h2>
+    <div id="status">
+      Apri <code>https://www.mediaworld.it/it/store/store-finder</code>,
+      visualizza sorgente pagina, copia tutto l’HTML e incollalo qui sotto.
+    </div>
+    <textarea id="inputHtml" placeholder="Incolla qui il sorgente HTML della pagina store-finder"></textarea>
+    <button id="parseBtn">Analizza</button>
+  </div>
+
+  <div class="col">
+    <h2>2. Seleziona gli store da TENERE</h2>
+    <div id="regionsContainer"></div>
+  </div>
+
+  <div class="col">
+    <h2>3. Output HTML filtrato</h2>
+    <button id="generateBtn">Genera output</button>
+    <button id="copyBtn">Copia</button>
+    <pre id="outputHtml"></pre>
+  </div>
+
+<script>
+// --- Parser: dal markup della pagina alle strutture {regionName, stores[]} ---
+function parseHtml(htmlString) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  const result = [];
+
+  // Header accordion delle regioni (come nello store-finder)
+  const accordions = doc.querySelectorAll('[data-test="accordion-header"]');
+
+  accordions.forEach(header => {
+    // Testo tipo "Abruzzo (7)" -> togliamo il numero tra parentesi
+    const regionName = header.textContent.replace(/\(\d+\)\s*$/, '').trim();
+    const wrapper = header.closest('li');
+    if (!wrapper) return;
+    const ul = wrapper.querySelector('ul');
+    if (!ul) return;
+
+    const stores = [];
+    ul.querySelectorAll('li a').forEach(a => {
+      const name = a.textContent.trim();
+      let href = a.getAttribute('href') || '';
+      // Normalizza in URL assoluto
+      if (href && href.startsWith('/')) {
+        href = 'https://www.mediaworld.it' + href;
+      }
+      stores.push({ name, href });
+    });
+
+    if (stores.length) {
+      result.push({ regionName, stores });
+    }
+  });
+
+  return result;
+}
+
+// --- UI: lista regioni + checkbox store ---
+function renderRegionSelector(data) {
+  const container = document.getElementById('regionsContainer');
+  container.innerHTML = '';
+
+  data.forEach((region, rIndex) => {
+    const div = document.createElement('div');
+    div.className = 'region';
+
+    const title = document.createElement('h4');
+    title.textContent = region.regionName;
+    div.appendChild(title);
+
+    const controls = document.createElement('div');
+    const selAll = document.createElement('button');
+    selAll.textContent = 'Seleziona tutti';
+    selAll.type = 'button';
+    selAll.onclick = () => {
+      div.querySelectorAll('input[type=checkbox]').forEach(ch => ch.checked = true);
+    };
+    const deselAll = document.createElement('button');
+    deselAll.textContent = 'Deseleziona tutti';
+    deselAll.type = 'button';
+    deselAll.onclick = () => {
+      div.querySelectorAll('input[type=checkbox]').forEach(ch => ch.checked = false);
+    };
+    controls.appendChild(selAll);
+    controls.appendChild(deselAll);
+    div.appendChild(controls);
+
+    const list = document.createElement('div');
+    list.className = 'city-list';
+
+    region.stores.forEach((store, sIndex) => {
+      const label = document.createElement('label');
+      label.className = 'city';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = true;
+      cb.dataset.regionIndex = rIndex;
+      cb.dataset.storeIndex = sIndex;
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(' ' + store.name));
+      list.appendChild(label);
+    });
+
+    div.appendChild(list);
+    container.appendChild(div);
+  });
+}
+
+// --- Generazione output HTML h3 + ul/li ---
+function generateOutput(data) {
+  const selected = [];
+
+  // quali store sono spuntati
+  document.querySelectorAll('#regionsContainer input[type=checkbox]').forEach(cb => {
+    const r = parseInt(cb.dataset.regionIndex, 10);
+    const s = parseInt(cb.dataset.storeIndex, 10);
+    if (!selected[r]) selected[r] = new Set();
+    if (cb.checked) selected[r].add(s);
+  });
+
+  let out = '';
+  data.forEach((region, rIndex) => {
+    const kept = region.stores.filter((_, sIndex) =>
+      selected[rIndex] && selected[rIndex].has(sIndex)
+    );
+    if (!kept.length) return;
+
+    out += `<h3>${region.regionName}</h3>\n<ul>\n`;
+    kept.forEach(store => {
+      out += `  <li><a href="${store.href}">${store.name}</a></li>\n`;
+    });
+    out += `</ul>\n\n`;
+  });
+
+  return out.trim();
+}
+
+
+
+// --- Stato globale ---
+let parsedData = [];
+
+// --- Event handlers ---
+document.getElementById('parseBtn').onclick = () => {
+  const status = document.getElementById('status');
+  const html = document.getElementById('inputHtml').value;
+  if (!html.trim()) {
+    status.textContent = 'Incolla prima il sorgente HTML della pagina store-finder.';
+    return;
+  }
+  try {
+    parsedData = parseHtml(html);
+    if (!parsedData.length) {
+      status.textContent = 'Nessuna regione trovata: controlla di aver incollato la pagina giusta.';
+      return;
+    }
+    renderRegionSelector(parsedData);
+    status.textContent = `Analisi completata: trovate ${parsedData.length} regioni.`;
+  } catch (e) {
+    console.error(e);
+    status.textContent = 'Errore di parsing: verifica il contenuto incollato.';
+  }
+};
+
+document.getElementById('generateBtn').onclick = () => {
+  if (!parsedData.length) return;
+  const out = generateOutput(parsedData);
+  document.getElementById('outputHtml').textContent = out;
+};
+
+document.getElementById('copyBtn').onclick = () => {
+  const out = document.getElementById('outputHtml').textContent;
+  if (!out) return;
+  navigator.clipboard.writeText(out).catch(() => {});
+};
+
+window.addEventListener('message', function(event) {
+  // Riceve i dati dal Bookmarklet
+  if (event.data && event.data.type === 'MW_STORES_DATA') {
+    parsedData = event.data.payload;
+    renderRegionSelector(parsedData);
+    document.getElementById('status').textContent = 
+      `Dati ricevuti con successo! Trovate ${parsedData.length} regioni.`;
+    
+    // Porta il focus sulla colonna di selezione
+    document.getElementById('regionsContainer').scrollIntoView({behavior: "smooth"});
+  }
+});
+</script>
+
+</body>
+</html>
