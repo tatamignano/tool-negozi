@@ -18,19 +18,23 @@
 </head>
 <body>
   <div class="col">
-    <h2>1. Incolla HTML store-finder</h2>
-    <div id="status">
-      Apri <code>https://www.mediaworld.it/it/store/store-finder</code>,
-      visualizza sorgente pagina, copia tutto l’HTML e incollalo qui sotto.
-    </div>
-    <textarea id="inputHtml" placeholder="Incolla qui il sorgente HTML della pagina store-finder"></textarea>
-    <button id="parseBtn">Analizza</button>
+  <h2>1. Selezione Store</h2>
+  
+  <div id="status" style="background: #fff3cd; padding: 10px; border-radius: 4px; border: 1px solid #ffeeba;">
+    In attesa dei dati... Usa il Bookmarklet dalla pagina MediaWorld.
   </div>
 
-  <div class="col">
-    <h2>2. Seleziona gli store da TENERE</h2>
-    <div id="regionsContainer"></div>
-  </div>
+  <details style="margin-top: 1rem; font-size: 0.8rem;">
+    <summary style="cursor:pointer; color: #666;">Hai problemi col Bookmarklet? Clicca qui per incollare l'HTML manualmente</summary>
+    <textarea id="inputHtml" placeholder="Incolla qui il sorgente HTML..."></textarea>
+    <button id="parseBtn" style="margin-top:5px">Analizza manuale</button>
+  </details>
+
+  <hr>
+
+  <div id="regionsContainer">
+    </div>
+</div>
 
   <div class="col">
     <h2>3. Output HTML filtrato</h2>
