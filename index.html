@@ -26,7 +26,6 @@
       font-size: 1.2rem;
     }
 
-    /* Effetto Monitor CRT */
     body::before {
       content: " ";
       display: block;
@@ -65,7 +64,6 @@
       position: relative;
     }
 
-    /* Fix Titolo Nascosto */
     .col h2 {
       position: absolute;
       top: -14px;
@@ -78,21 +76,16 @@
     }
 
     .col-setup { flex: 0 0 320px; }
-    
-    /* Colonna Selezione con Fix Overflow */
     .col-selection { flex: 1; }
     #regionsContainer { 
       flex: 1; 
       overflow-y: auto; 
       margin-top: 10px;
-      padding-right: 10px;
     }
 
     .region { margin-bottom: 1.5rem; border-top: 1px dashed var(--dos-green); padding-top: 10px; }
     .region-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .region-header h4 { margin: 0; }
     
-    /* Bottoni Mini per Regioni */
     .btn-mini { font-size: 0.8rem; padding: 2px 5px; margin: 0 2px; border-width: 1px; }
 
     .city-list { 
@@ -101,9 +94,13 @@
       gap: 5px; 
     }
     .city { font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; }
-    .city input { accent-color: var(--dos-green); margin-right: 10px; cursor: pointer; }
+    .city input { accent-color: var(--dos-green); margin-right: 10px; }
 
-    .col-output { flex: 0 0 350px; }
+    .col-output { flex: 0 0 400px; }
+    
+    /* Contenitori Output */
+    .output-section { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    
     pre#outputHtml { 
       border: 1px solid var(--dos-green); 
       background: rgba(51, 255, 51, 0.05); 
@@ -111,33 +108,37 @@
       padding: 10px; 
       flex: 1; 
       overflow: auto; 
-      font-size: 1rem; 
-      margin-top: 10px;
+      font-size: 0.9rem; 
+      margin-top: 5px;
+      margin-bottom: 15px;
     }
 
-    #status { padding: 5px; margin-top: 10px; text-align: center; border: 1px solid var(--dos-green); }
-    .status-waiting { animation: pulse 1.5s infinite; }
-    .status-ready { background: var(--dos-green); color: var(--dos-bg); }
+    #richPreview {
+      border: 1px solid var(--dos-green);
+      background: white;
+      color: black;
+      padding: 10px;
+      flex: 1;
+      overflow: auto;
+      font-family: sans-serif; /* Per vedere come apparirà su Word */
+      font-size: 14px;
+      text-transform: none; /* Mantieni case originale per l'anteprima */
+    }
 
     button { 
       background: transparent; 
       color: var(--dos-green); 
       border: 2px solid var(--dos-green); 
       font-family: 'VT323', monospace; 
-      font-size: 1.2rem; 
+      font-size: 1.1rem; 
       cursor: pointer; 
-      margin-bottom: 10px; 
       padding: 5px;
+      width: 100%;
+      margin-bottom: 5px;
     }
     button:hover { background: var(--dos-green); color: var(--dos-bg); }
 
-    .external-link {
-        color: var(--dos-green);
-        text-decoration: underline;
-        display: block;
-        margin-top: 15px;
-        font-weight: bold;
-    }
+    .external-link { color: var(--dos-green); text-decoration: underline; display: block; margin-top: 15px; }
 
     .feedback-btn { 
       position: fixed; bottom: 20px; right: 20px; 
@@ -145,9 +146,6 @@
       color: var(--dos-green); padding: 10px 15px; 
       text-decoration: none; z-index: 10000;
     }
-    .feedback-btn:hover { background: var(--dos-green); color: var(--dos-bg); }
-
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: var(--dos-bg); border-left: 1px solid var(--dos-green); }
@@ -157,41 +155,46 @@
 <body>
 
 <header>
-  <h1>SYSTEM_LOAD: MW_LIST_GEN.EXE (V2.0)</h1>
+  <h1>SYSTEM_LOAD: MW_LIST_GEN.EXE (V2.1)</h1>
 </header>
 
 <div class="main-container">
   <div class="col col-setup">
     <h2>[ 01-SETUP ]</h2>
     <p>> 1. INSTALLA BOOKMARKLET:</p>
-    <textarea id="bmCode" readonly style="width:100%; height:80px; background:transparent; color:var(--dos-green); border:1px solid var(--dos-border); font-family:'VT323'; padding:5px; resize:none;"></textarea>
-    <button id="btnCopyBM" onclick="copyBM()" style="width:100%; margin-top:10px;">COPY_DATA_STRING</button>
+    <textarea id="bmCode" readonly style="width:100%; height:60px; background:transparent; color:var(--dos-green); border:1px solid var(--dos-border); font-family:'VT323'; padding:5px; resize:none;"></textarea>
+    <button id="btnCopyBM" onclick="copyBM()">COPY_DATA_STRING</button>
     
-    <p style="margin-top:20px;">> 2. ESEGUI ESTRAZIONE:</p>
-    <a href="https://www.mediaworld.it/it/store/store-finder" target="_blank" class="external-link">
-        > APRI STORE_FINDER.URL
-    </a>
-    <p style="font-size: 0.8rem; margin-top: 5px;">(UNA VOLTA APERTO, CLICCA SUL PREFERITO "ESTRAI STORE")</p>
+    <p style="margin-top:15px;">> 2. ESEGUI ESTRAZIONE:</p>
+    <a href="https://www.mediaworld.it/it/store/store-finder" target="_blank" class="external-link">> APRI STORE_FINDER.URL</a>
     
-    <div id="status" class="status-waiting" style="margin-top:20px;">SISTEMA_IN_ATTESA...</div>
+    <div id="status" class="status-waiting" style="margin-top:20px; border:1px solid var(--dos-green); padding:5px; text-align:center;">SISTEMA_IN_ATTESA...</div>
   </div>
 
   <div class="col col-selection">
     <h2>[ 02-STORE_SELECTOR ]</h2>
-    <div class="btn-group">
-      <button onclick="toggleAll(true)">[ SELECT_ALL ]</button>
-      <button onclick="toggleAll(false)">[ DESELECT_ALL ]</button>
+    <div style="display:flex; gap:10px;">
+        <button onclick="toggleAll(true)">[ SELECT_ALL ]</button>
+        <button onclick="toggleAll(false)">[ DESELECT_ALL ]</button>
     </div>
     <div id="regionsContainer">
-      <p style="text-align:center; margin-top:40px;">NESSUN DATO RILEVATO. LANCIARE BOOKMARKLET DALLA PAGINA MW.</p>
+      <p style="text-align:center; margin-top:40px;">NESSUN DATO RILEVATO.</p>
     </div>
   </div>
 
   <div class="col col-output">
-    <h2>[ 03-HTML_OUTPUT ]</h2>
-    <button onclick="generateOutput()" style="width:100%">GENERA_CODICE.BAT</button>
-    <button id="btnCopyOutput" onclick="copyOutput()" style="width:100%">COPY_TO_CLIPBOARD</button>
-    <pre id="outputHtml">PROMPT_READY></pre>
+    <h2>[ 03-OUTPUT_MODES ]</h2>
+    <button onclick="generateOutput()" style="background:var(--dos-green); color:var(--dos-bg); font-weight:bold;">GENERA_TUTTI_FORMATI.BAT</button>
+    
+    <div class="output-section">
+        <label style="font-size:0.8rem;">> FORMATO_HTML_CODE:</label>
+        <button id="btnCopyOutput" onclick="copyOutput()" style="font-size:0.9rem">COPY_HTML_SOURCE</button>
+        <pre id="outputHtml"></pre>
+
+        <label style="font-size:0.8rem;">> FORMATO_RICH_TEXT (WORD/MAIL):</label>
+        <button id="btnCopyRich" onclick="copyRichText()" style="font-size:0.9rem">COPY_FORMATTED_TEXT</button>
+        <div id="richPreview"></div>
+    </div>
   </div>
 </div>
 
@@ -207,8 +210,7 @@ function copyBM() {
   const area = document.getElementById('bmCode');
   area.select();
   navigator.clipboard.writeText(area.value);
-  document.getElementById('btnCopyBM').textContent = "✅ SUCCESS_COPY";
-  setTimeout(() => document.getElementById('btnCopyBM').textContent = "COPY_DATA_STRING", 2000);
+  document.getElementById('btnCopyBM').textContent = "✅ SUCCESS";
 }
 
 window.addEventListener('message', function(event) {
@@ -217,7 +219,8 @@ window.addEventListener('message', function(event) {
     renderRegionSelector(parsedData);
     const status = document.getElementById('status');
     status.textContent = "READY: DATI_RICEVUTI";
-    status.className = "status-ready";
+    status.style.background = "var(--dos-green)";
+    status.style.color = "var(--dos-bg)";
   }
 });
 
@@ -259,26 +262,52 @@ function toggleRegion(rIndex, state) {
 
 function generateOutput() {
   if (!parsedData.length) return;
-  let out = '';
+  let outHtml = '';
+  
   parsedData.forEach((region, rIndex) => {
     const checks = document.querySelectorAll(`input[data-r="${rIndex}"]:checked`);
     if (checks.length === 0) return;
-    out += `<h3>${region.regionName}</h3>\n<ul>\n`;
+    
+    outHtml += `<h3>${region.regionName}</h3>\n<ul>\n`;
     checks.forEach(cb => {
       const s = parsedData[rIndex].stores[cb.dataset.s];
-      out += `  <li><a href="${s.href}" target="_blank">${s.name}</a></li>\n`;
+      outHtml += `  <li><a href="${s.href}" target="_blank">${s.name}</a></li>\n`;
     });
-    out += `</ul>\n\n`;
+    outHtml += `</ul>\n\n`;
   });
-  document.getElementById('outputHtml').textContent = out.trim();
+
+  // Aggiorna box Codice
+  document.getElementById('outputHtml').textContent = outHtml.trim();
+  
+  // Aggiorna box Anteprima Visiva (Rich Text)
+  document.getElementById('richPreview').innerHTML = outHtml;
 }
 
 function copyOutput() {
   const content = document.getElementById('outputHtml').textContent;
   if(!content) return;
   navigator.clipboard.writeText(content);
-  document.getElementById('btnCopyOutput').textContent = "✅ CLIPBOARD_SAVED";
-  setTimeout(() => document.getElementById('btnCopyOutput').textContent = "COPY_TO_CLIPBOARD", 2000);
+  document.getElementById('btnCopyOutput').textContent = "✅ HTML_COPIED";
+}
+
+function copyRichText() {
+  const container = document.getElementById('richPreview');
+  if (!container.innerHTML) return;
+
+  const range = document.createRange();
+  range.selectNode(container);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+
+  try {
+    document.execCommand('copy');
+    document.getElementById('btnCopyRich').textContent = "✅ FORMAT_COPIED";
+  } catch (err) {
+    alert('Errore durante la copia');
+  }
+  
+  window.getSelection().removeAllRanges();
+  setTimeout(() => document.getElementById('btnCopyRich').textContent = "COPY_FORMATTED_TEXT", 2000);
 }
 </script>
 </body>
