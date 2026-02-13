@@ -3,112 +3,216 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediaWorld Store Tool - Dashboard</title>
+  <title>MW_STORE.EXE - MediaWorld Store Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <style>
-    :root { --mw-red: #ed1c24; --bg: #f4f7f6; --text: #333; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+    :root { 
+      --dos-green: #33ff33; 
+      --dos-bg: #000; 
+      --dos-border: #33ff33;
+    }
     
-    header { background: var(--mw-red); color: white; padding: 1rem 2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    header h1 { margin: 0; font-size: 1.5rem; }
+    * { box-sizing: border-box; text-transform: uppercase; }
 
-    .main-container { display: flex; flex: 1; overflow: hidden; padding: 1.5rem; gap: 1.5rem; }
-    .col { background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; padding: 1.5rem; }
-    
-    /* Colonna 1: Istruzioni */
+    body { 
+      font-family: 'VT323', monospace; 
+      background-color: var(--dos-bg); 
+      color: var(--dos-green); 
+      margin: 0; 
+      display: flex; 
+      flex-direction: column; 
+      height: 100vh;
+      overflow: hidden;
+      font-size: 1.2rem;
+    }
+
+    /* Effetto Monitor CRT */
+    body::before {
+      content: " ";
+      display: block;
+      position: fixed;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+      z-index: 9999;
+      background-size: 100% 3px;
+      pointer-events: none;
+    }
+
+    header { 
+      border-bottom: 2px solid var(--dos-border); 
+      padding: 10px 20px; 
+      background: var(--dos-green); 
+      color: var(--dos-bg);
+    }
+
+    h1 { margin: 0; font-size: 1.8rem; }
+
+    .main-container { 
+      display: flex; 
+      flex: 1; 
+      overflow: hidden; 
+      padding: 1rem; 
+      gap: 1rem; 
+    }
+
+    .col { 
+      border: 2px solid var(--dos-border); 
+      display: flex; 
+      flex-direction: column; 
+      padding: 1rem; 
+      position: relative;
+    }
+
+    .col h2 {
+      position: absolute;
+      top: -15px;
+      left: 10px;
+      background: var(--dos-bg);
+      padding: 0 10px;
+      font-size: 1.2rem;
+      margin: 0;
+    }
+
+    /* Colonna 1: Setup */
     .col-setup { flex: 0 0 320px; }
-    .step { margin-bottom: 1.5rem; border-left: 3px solid var(--mw-red); padding-left: 1rem; }
-    .step h3 { margin: 0 0 0.5rem 0; font-size: 1rem; }
-    textarea#bmCode { width: 100%; height: 80px; font-size: 10px; font-family: monospace; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: none; background: #fafafa; box-sizing: border-box; }
-    
+    textarea#bmCode { 
+      width: 100%; 
+      height: 80px; 
+      background: transparent; 
+      color: var(--dos-green); 
+      border: 1px solid var(--dos-border); 
+      font-family: 'VT323', monospace;
+      padding: 5px;
+      resize: none;
+      margin-top: 10px;
+    }
+
     /* Colonna 2: Selezione */
     .col-selection { flex: 1; overflow-y: auto; }
-    .region { margin-bottom: 1.2rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
-    .city-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 0.8rem; }
-    .city { font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .region { margin-bottom: 1.5rem; border-top: 1px dashed var(--dos-green); padding-top: 10px; }
+    .city-list { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+      gap: 5px; 
+    }
+    .city { font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; }
+    .city input { accent-color: var(--dos-green); margin-right: 10px; }
 
     /* Colonna 3: Output */
     .col-output { flex: 0 0 350px; }
-    pre#outputHtml { background: #2d2d2d; color: #76ff03; padding: 1rem; border-radius: 4px; flex: 1; overflow: auto; font-size: 12px; margin: 0; }
+    pre#outputHtml { 
+      border: 1px solid var(--dos-green); 
+      background: rgba(51, 255, 51, 0.05); 
+      color: var(--dos-green); 
+      padding: 10px; 
+      flex: 1; 
+      overflow: auto; 
+      font-size: 1rem; 
+      margin-top: 10px;
+    }
 
-    /* UI Elements */
-    #status { padding: 10px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 1rem; text-align: center; font-weight: bold; }
-    .status-waiting { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-    .status-ready { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    /* Status Bar */
+    #status { 
+      padding: 5px; 
+      margin-top: 10px; 
+      text-align: center; 
+      border: 1px solid var(--dos-green);
+    }
+    .status-waiting { animation: pulse 1.5s infinite; }
+    .status-ready { background: var(--dos-green); color: var(--dos-bg); }
+
+    /* Bottoni stile DOS */
+    button { 
+      background: transparent; 
+      color: var(--dos-green); 
+      border: 2px solid var(--dos-green); 
+      font-family: 'VT323', monospace; 
+      font-size: 1.2rem; 
+      cursor: pointer; 
+      margin-bottom: 10px; 
+      padding: 5px;
+    }
+    button:hover { 
+      background: var(--dos-green); 
+      color: var(--dos-bg); 
+    }
+
+    .btn-group { display: flex; gap: 10px; }
     
-    button { cursor: pointer; border: none; border-radius: 4px; padding: 8px 12px; font-weight: bold; transition: 0.3s; }
-    .btn-primary { background: var(--mw-red); color: white; width: 100%; }
-    .btn-secondary { background: #6c757d; color: white; font-size: 0.75rem; }
-    .btn-copy { background: #28a745; color: white; width: 100%; margin-bottom: 10px; }
-    .btn-group { display: flex; gap: 5px; margin-bottom: 10px; }
+    a { color: var(--dos-green); text-decoration: underline; }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+
+    /* Scrollbar personalizzata stile terminale */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: var(--dos-bg); border-left: 1px solid var(--dos-green); }
+    ::-webkit-scrollbar-thumb { background: var(--dos-green); }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>MediaWorld List Generator</h1>
+  <h1>SYSTEM_LOAD: MW_LIST_GEN.EXE (V2.0)</h1>
 </header>
 
 <div class="main-container">
   <div class="col col-setup">
-    <h2>⚙️ Setup</h2>
-    <div class="step">
-      <h3>1. Crea il pulsante</h3>
-      <p style="font-size:0.8rem">Crea un preferito nella barra del browser, chiamalo "Estrai Store" e incolla questo codice come URL:</p>
-      <textarea id="bmCode" readonly></textarea>
-      <button class="btn-primary" id="btnCopyBM" onclick="copyBM()" style="margin-top:8px">Copia Codice</button>
-    </div>
-    <div class="step">
-      <h3>2. Estrai i dati</h3>
-      <p style="font-size:0.8rem">Vai su <a href="https://www.mediaworld.it/it/store/store-finder" target="_blank">MediaWorld Store Finder</a> e clicca sul preferito creato.</p>
-    </div>
-    <div id="status" class="status-waiting">In attesa di dati...</div>
+    <h2>[ 01-SETUP ]</h2>
+    <p>> 1. INSTALLA BOOKMARKLET:</p>
+    <p style="font-size:0.9rem">TRASCINA O COPIA QUESTO CODICE NEI PREFERITI:</p>
+    <textarea id="bmCode" readonly></textarea>
+    <button id="btnCopyBM" onclick="copyBM()" style="width:100%; margin-top:10px;">COPY_DATA_STRING</button>
+    
+    <p>> 2. ESEGUI ESTRAZIONE:</p>
+    <p style="font-size:0.9rem">APRI <a href="https://www.mediaworld.it/it/store/store-finder" target="_blank">STORE_FINDER</a> E LANCIA IL PREFERITO.</p>
+    <div id="status" class="status-waiting">SISTEMA_IN_ATTESA...</div>
   </div>
 
   <div class="col col-selection">
-    <h2>📍 Seleziona Negozi</h2>
+    <h2>[ 02-STORE_SELECTOR ]</h2>
     <div class="btn-group">
-      <button class="btn-secondary" onclick="toggleAll(true)">Seleziona Tutti</button>
-      <button class="btn-secondary" onclick="toggleAll(false)">Deseleziona Tutti</button>
+      <button onclick="toggleAll(true)">[ SELECT_ALL ]</button>
+      <button onclick="toggleAll(false)">[ DESELECT_ALL ]</button>
     </div>
     <div id="regionsContainer">
-      <p style="color:#999; text-align:center; margin-top:40px;">Usa il bookmarklet sulla pagina MediaWorld per caricare qui la lista dei negozi.</p>
+      <p style="text-align:center; margin-top:40px;">NESSUN DATO RILEVATO. LANCIARE BOOKMARKLET.</p>
     </div>
   </div>
 
   <div class="col col-output">
-    <h2>📄 Codice HTML</h2>
-    <button class="btn-copy" id="btnGenerate" onclick="generateOutput()">Genera Codice</button>
-    <button class="btn-primary" id="btnCopyOutput" onclick="copyOutput()" style="background:#444; margin-bottom:10px">Copia HTML Finale</button>
-    <pre id="outputHtml"></pre>
+    <h2>[ 03-HTML_OUTPUT ]</h2>
+    <button id="btnGenerate" onclick="generateOutput()" style="width:100%">GENERA_CODICE.BAT</button>
+    <button id="btnCopyOutput" onclick="copyOutput()" style="width:100%">COPY_TO_CLIPBOARD</button>
+    <pre id="outputHtml">PROMPT_READY></pre>
   </div>
 </div>
 
 <script>
+// La tua logica originale rimane intatta al 100%
 let parsedData = [];
 
-// Il codice del Bookmarklet aggiornato col tuo URL
 const bookmarkletCode = `javascript:(function(){const accordions=document.querySelectorAll('[data-test="accordion-header"]');const result=[];function titleCase(str){return str.toLowerCase().split(' ').map(word=>word.charAt(0).toUpperCase()+word.slice(1)).join(' ')}accordions.forEach(header=>{const regionName=header.textContent.replace(/\\(\\d+\\)\\s*$/, '').trim();const wrapper=header.closest('li');if(!wrapper)return;const ul=wrapper.querySelector('ul');if(!ul)return;const stores=[];ul.querySelectorAll('li a').forEach(a=>{const name=titleCase(a.textContent.trim());let href=a.getAttribute('href')||'';if(href&&href.startsWith('/')){href='https://www.mediaworld.it'+href}stores.push({name,href})});if(stores.length){result.push({regionName,stores})}});if(result.length>0){const toolUrl='https://tatamignano.github.io/tool-negozi/';const win=window.open(toolUrl,'mw_tool');if(!win){alert('Popup bloccato! Abilita i popup nelle impostazioni del browser.');return}setTimeout(()=>{win.postMessage({type:'MW_STORES_DATA',payload:result},'*')},2000)}else{alert('Nessuno store trovato. Assicurati di essere nella pagina Store Finder.');}})();`;
 document.getElementById('bmCode').value = bookmarkletCode;
-
-// --- FUNZIONI TOOL ---
-// --- COMMENTO OBSOLETO ---
 
 function copyBM() {
   const area = document.getElementById('bmCode');
   area.select();
   navigator.clipboard.writeText(area.value);
   const btn = document.getElementById('btnCopyBM');
-  btn.textContent = "✅ Copiato!";
-  setTimeout(() => btn.textContent = "Copia Codice", 2000);
+  btn.textContent = "✅ SUCCESS_COPY";
+  setTimeout(() => btn.textContent = "COPY_DATA_STRING", 2000);
 }
 
-// Ricezione dati dal Bookmarklet
 window.addEventListener('message', function(event) {
   if (event.data && event.data.type === 'MW_STORES_DATA') {
     parsedData = event.data.payload;
     renderRegionSelector(parsedData);
     const status = document.getElementById('status');
-    status.textContent = "✅ Dati Ricevuti!";
+    status.textContent = "READY: DATI_RICEVUTI";
     status.className = "status-ready";
   }
 });
@@ -119,7 +223,7 @@ function renderRegionSelector(data) {
   data.forEach((region, rIndex) => {
     const div = document.createElement('div');
     div.className = 'region';
-    div.innerHTML = `<h4>${region.regionName}</h4>`;
+    div.innerHTML = `<h4>> ${region.regionName}</h4>`;
     const list = document.createElement('div');
     list.className = 'city-list';
     region.stores.forEach((store, sIndex) => {
@@ -158,8 +262,8 @@ function copyOutput() {
   if(!content) return;
   navigator.clipboard.writeText(content);
   const btn = document.getElementById('btnCopyOutput');
-  btn.textContent = "✅ Copiato negli appunti!";
-  setTimeout(() => btn.textContent = "Copia HTML Finale", 2000);
+  btn.textContent = "✅ CLIPBOARD_SAVED";
+  setTimeout(() => btn.textContent = "COPY_TO_CLIPBOARD", 2000);
 }
 </script>
 </body>
