@@ -184,6 +184,22 @@
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: var(--dos-bg); border-left: 1px solid var(--dos-green); }
     ::-webkit-scrollbar-thumb { background: var(--dos-green); }
+    /* Mobile optimizations */
+    @media (max-width: 600px) {
+      body { padding: 12px; font-size: 1rem; height: auto; }
+      .main-container { flex-direction: column; gap: 12px; padding-bottom: 80px; }
+      .col, .col-setup, .col-selection, .col-output { flex: none; width: 100%; }
+      .col { padding: 12px; }
+      .col h2 { position: static; margin-bottom: 8px; font-size: 1.2rem; }
+      button { width: 100%; padding: 8px 12px; font-size: 1.05rem; }
+      pre#outputHtml { font-size: 0.9rem; }
+      #richPreview { font-size: 13px; }
+      /* center util buttons at bottom on mobile */
+      .util-fixed { left: 50%; right: auto; transform: translateX(-50%); bottom: 14px; }
+      .util-fixed a { display: inline-block; }
+      .feedback-btn, .back-btn { padding: 6px 12px; font-size: 1.05rem; }
+      body::before { background-size: 100% 4px; }
+    }
   </style>
 </head>
 <body>
