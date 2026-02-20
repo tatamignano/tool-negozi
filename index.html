@@ -186,18 +186,18 @@
     ::-webkit-scrollbar-thumb { background: var(--dos-green); }
     /* Mobile optimizations */
     @media (max-width: 600px) {
-      body { padding: 12px; font-size: 1rem; height: auto; }
-      .main-container { flex-direction: column; gap: 12px; padding-bottom: 80px; }
+      body { padding: 12px; font-size: 1rem; height: auto; overflow: auto; }
+      .main-container { flex-direction: column; gap: 12px; padding-bottom: 12px; max-height: calc(100vh - 56px); overflow: auto; }
       .col, .col-setup, .col-selection, .col-output { flex: none; width: 100%; }
       .col { padding: 12px; }
       .col h2 { position: static; margin-bottom: 8px; font-size: 1.2rem; }
       button { width: 100%; padding: 8px 12px; font-size: 1.05rem; }
       pre#outputHtml { font-size: 0.9rem; }
       #richPreview { font-size: 13px; }
-      /* center util buttons at bottom on mobile */
-      .util-fixed { left: 50%; right: auto; transform: translateX(-50%); bottom: 14px; }
+      /* util bar becomes small non-fixed strip under content */
+      .util-fixed { position: static; width: 100%; display: flex; justify-content: center; gap: 8px; padding: 6px 0; background: var(--dos-bg); border-top: 1px solid var(--dos-green); margin-top: 10px; transform: none; }
       .util-fixed a { display: inline-block; }
-      .feedback-btn, .back-btn { padding: 6px 12px; font-size: 1.05rem; }
+      .feedback-btn, .back-btn { padding: 6px 10px; font-size: 1.05rem; }
       body::before { background-size: 100% 4px; }
     }
   </style>
@@ -249,7 +249,7 @@
 </div>
 
 <div class="util-fixed">
-  <a href="https://tatamignano.github.io/amhub/" class="back-btn">[ &lt; RETURN_TO_HUB ]</a>
+  <a href="https://tatamignano.github.io/amhub/" class="back-btn">RETURN_TO_HUB</a>
   <a href="mailto:antonio.mignano@idntt.ch?subject=Feedback Tool Store" class="feedback-btn">SEND_FEEDBACK.MAIL</a>
 </div>
 
