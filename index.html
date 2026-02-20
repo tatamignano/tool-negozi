@@ -37,6 +37,7 @@
     .back-btn:hover {
       background: var(--dos-green);
       color: var(--dos-bg);
+      z-index: 10000;
     }
 
     body { 
@@ -166,9 +167,18 @@
     .external-link { color: var(--dos-green); text-decoration: underline; margin-top: 15px; }
 
     .feedback-btn { 
-      border: 1px solid var(--dos-green); background: var(--dos-bg); 
-      color: var(--dos-green); padding: 10px 15px; 
+      background: var(--dos-bg);
+      color: var(--dos-green);
+      border: 2px solid var(--dos-green);
+      padding: 6px 10px;
+      font-family: 'VT323', monospace;
       text-decoration: none;
+      transition: background .12s, color .12s;
+    }
+    .feedback-btn:hover { 
+      background: var(--dos-green);
+      color: var(--dos-bg);
+      z-index: 10000;
     }
 
     ::-webkit-scrollbar { width: 8px; }
